@@ -42,11 +42,13 @@ def train():
         # Preprocess
         ev = Evaluate()
         print("load images")
-        x_tr = mvtecad.get_x_standardized(obj, mode='train')
-        x_te = mvtecad.get_x_standardized(obj, mode='test')
+        load = LoadImages(DEFAULTOBJ)
+        
+        standardized_images_train = load.get_standardized_images_train()
+        standardized_images_test = load.get_standardized_images_test(image)
 
-        ev.set_x_tr(x_tr)
-        ev.set_x_te(x_te)
+        ev.set_x_tr(standardized_images_train)
+        ev.set_x_te(standardized_images_test)
 
         train_x = NHWC2NCHW(x_tr)
 
