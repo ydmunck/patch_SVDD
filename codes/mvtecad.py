@@ -43,7 +43,7 @@ class LoadImages:
             self.standardized_images_train = (self.get_images_train().astype(np.float32) - self.get_mean()) / 255
         return self.standardized_images_train
     
-    def get_standardized_images_test(self, image: Image) -> np.asarray:
+    def get_standardized_images_test(self) -> np.asarray:
         """Get standardized images for the test dataset
         :param image: input image for inference
         :type image: Image
@@ -51,7 +51,7 @@ class LoadImages:
         :rtype: np.asarray
         """
         if self.standardized_images_test is None:
-            self.standardized_images_test = (self.get_images_test(image).astype(np.float32) - self.get_mean()) / 255
+            self.standardized_images_test = (self.get_images_test().astype(np.float32) - self.get_mean()) / 255
         return self.standardized_images_test
     
     def get_mean(self):
@@ -72,7 +72,7 @@ class LoadImages:
         """
         if self.images_train is None:
             mode = "train"
-            fpattern = os.path.join(DATASET_PATH, f'{self.obj}/{mode}/*/*.png')
+            fpattern = os.path.join(DATASET_PATH, f'{self.obj}/{mode}/*/*.jpg')
             fpaths = sorted(glob(fpattern))
     
             images = np.asarray(list(map(imread, fpaths)))
@@ -84,7 +84,7 @@ class LoadImages:
             self.images_train = np.asarray(images)
         return self.images_train
     
-    def get_images_test(self, image: Image) -> np.asarray:
+    def get_images_test(self) -> np.asarray:
         """Load image in memory for testing
         :param image: input image for inference
         :type image: Image
@@ -92,10 +92,13 @@ class LoadImages:
         :rtype: np.asarray
         """
         if self.images_test is None:
-            self.images_test = np.asarray(list(image))
-            IF_GRAYSCALE = self.images_test.shape[-1] != 3
+            mode = "test"
+            fpattern = os.path.join(DATASET_PATH, f'{self.obj}/{mode}/*/*.jpg')
+            fpaths = sorted(glob(fpattern))
+            images = np.asarray(list(map(imread, fpaths)))
+            IF_GRAYSCALE = images.shape[-1] != 3
             if IF_GRAYSCALE:
-                self.images_test = gray2rgb(self.images_test)
-            self.images_test = np.asarray(self.images_test)
-            
+                images = gray2rgb(images)
+                
+            self.images_test = np.asarray(images)
         return self.images_test

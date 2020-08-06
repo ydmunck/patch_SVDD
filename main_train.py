@@ -7,6 +7,7 @@ from codes.datasets import *
 from codes.networks import *
 from codes.inspection import Evaluate
 from codes.utils import *
+from codes.mvtecad import LoadImages
 
 parser = argparse.ArgumentParser()
 
@@ -42,13 +43,13 @@ def train():
         # Preprocess
         ev = Evaluate()
         print("load images")
-        load = LoadImages(DEFAULTOBJ)
+        load = LoadImages("LUX18")
         
         standardized_images_train = load.get_standardized_images_train()
-        standardized_images_test = load.get_standardized_images_test(image)
+        standardized_images_test = load.get_standardized_images_test()
 
-        ev.set_x_tr(standardized_images_train)
-        ev.set_x_te(standardized_images_test)
+        ev.set_standardized_images_train(standardized_images_train)
+        ev.set_standardized_images_test(standardized_images_test)
 
         train_x = NHWC2NCHW(x_tr)
 

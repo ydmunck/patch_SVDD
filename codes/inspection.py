@@ -8,10 +8,7 @@ from .utils import PatchDataset_NCHW, NHWC2NCHW, distribute_scores
 __all__ = ['eval_encoder_NN_multiK', 'eval_embeddings_NN_multiK']
 
 
-def infer(x, enc, K, S):
-    x = NHWC2NCHW(x)
-    dataset = PatchDataset_NCHW(x, K=K, S=S)
-    loader = DataLoader(dataset, batch_size=512, shuffle=False, pin_memory=True, num_workers=32)
+def infer(dataset, loader, enc):
     embs = np.empty((dataset.N, dataset.row_num, dataset.col_num, enc.D), dtype=np.float32)  # [-1, I, J, D]
     enc = enc.eval()
     with torch.no_grad():
@@ -39,26 +36,53 @@ def assess_anomaly_maps(obj, anomaly_maps):
 
 class Evaluate:
     def __init__(self):
-        self.x_tr = None
-        self.x_te = None
+        self.standardized_images_train = None
+        self.standardized_images_test = None
+        
+        self.dataset_train_64 = None
+        self.dataset_train_32 = None
+        self.dataset_test_64 = None
+        self.dataset_test_32 = None
+        
+        self.loader_train_64 = None
+        self.loader_train_32 = None
+        self.loader_test_64 = None
+        self.loader_test_32 = None
 
-    def set_x_tr(self, x_tr):
-        self.x_tr = x_tr
+        
+    def set_standardized_images_train(self, standardized_images_train):
+        self.standardized_images_train = standardized_images_train
+        
+        transposed = NHWC2NCHW(self.standardized_images_train)
+        
+        self.dataset_train_64 = PatchDataset_NCHW(transposed, K=64, S=16)
+        self.dataset_train_32 = PatchDataset_NCHW(transposed, K=32, S=4)
+        
+        self.loader_train_64 = DataLoader(dataset_train_64, batch_size=512, shuffle=False, pin_memory=True, num_workers=32)
+        self.loader_train_32 = DataLoader(dataset_train_32, batch_size=512, shuffle=False, pin_memory=True, num_workers=32)
 
-    def set_x_te(self, x_te):
-        self.x_te = x_te
+    def set_standardized_images_test(self, standardized_images_test):
+        self.standardized_images_test = standardized_images_test
+        
+        transposed = NHWC2NCHW(self.standardized_images_test)
+        
+        self.dataset_test_64 = PatchDataset_NCHW(transposed, K=64, S=16)
+        self.dataset_test_32 = PatchDataset_NCHW(transposed, K=32, S=4)
+        
+        self.loader_test_64 = DataLoader(dataset_test_64, batch_size=512, shuffle=False, pin_memory=True, num_workers=32)
+        self.loader_test_32 = DataLoader(dataset_test_32, batch_size=512, shuffle=False, pin_memory=True, num_workers=32)
 
     def eval_encoder_NN_multiK(self, enc):
         print("First embeddings")
-        embs64_tr = infer(self.x_tr, enc, K=64, S=16)
-        embs64_te = infer(self.x_te, enc, K=64, S=16)
+        embs64_train = infer(self.dataset_train_64, self.loader_train_64, enc)
+        embs64_te = infer(self.dataset_test_64, self.loader_test_64, enc)
 
         print("Last embeddings")
-        embs32_tr = infer(self.x_tr, enc.enc, K=32, S=4)
-        embs32_te = infer(self.x_te, enc.enc, K=32, S=4)
+        embs32_tr = infer(self.dataset_train_32, self.loader_train_32, enc.enc)
+        embs32_te = infer(self.dataset_test_32, self.loader_test_32, enc.enc)
 
-        embs64 = embs64_tr, embs64_te
-        embs32 = embs32_tr, embs32_te
+        embs64 = embs64_train, embs64_te
+        embs32 = embs32_train, embs32_te
         return embs64, embs32
 
 
