@@ -58,8 +58,8 @@ class Evaluate:
         self.dataset_train_64 = PatchDataset_NCHW(transposed, K=64, S=16)
         self.dataset_train_32 = PatchDataset_NCHW(transposed, K=32, S=4)
         
-        self.loader_train_64 = DataLoader(dataset_train_64, batch_size=512, shuffle=False, pin_memory=True, num_workers=32)
-        self.loader_train_32 = DataLoader(dataset_train_32, batch_size=512, shuffle=False, pin_memory=True, num_workers=32)
+        self.loader_train_64 = DataLoader(self.dataset_train_64, batch_size=512, shuffle=False, pin_memory=True, num_workers=32)
+        self.loader_train_32 = DataLoader(self.dataset_train_32, batch_size=512, shuffle=False, pin_memory=True, num_workers=32)
 
     def set_standardized_images_test(self, standardized_images_test):
         self.standardized_images_test = standardized_images_test
@@ -69,8 +69,8 @@ class Evaluate:
         self.dataset_test_64 = PatchDataset_NCHW(transposed, K=64, S=16)
         self.dataset_test_32 = PatchDataset_NCHW(transposed, K=32, S=4)
         
-        self.loader_test_64 = DataLoader(dataset_test_64, batch_size=512, shuffle=False, pin_memory=True, num_workers=32)
-        self.loader_test_32 = DataLoader(dataset_test_32, batch_size=512, shuffle=False, pin_memory=True, num_workers=32)
+        self.loader_test_64 = DataLoader(self.dataset_test_64, batch_size=512, shuffle=False, pin_memory=True, num_workers=32)
+        self.loader_test_32 = DataLoader(self.dataset_test_32, batch_size=512, shuffle=False, pin_memory=True, num_workers=32)
 
     def eval_encoder_NN_multiK(self, enc):
         print("First embeddings")

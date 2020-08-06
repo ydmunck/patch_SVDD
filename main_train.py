@@ -51,7 +51,7 @@ def train():
         ev.set_standardized_images_train(standardized_images_train)
         ev.set_standardized_images_test(standardized_images_test)
 
-        train_x = NHWC2NCHW(x_tr)
+        train_x = NHWC2NCHW(standardized_images_train)
 
         print("init dataset")
         rep = 100
